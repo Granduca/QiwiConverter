@@ -39,7 +39,6 @@ class Converter:
         block = soup.find('div', {"class": "cur-rate"})
         byn_rate = block.find('div', attrs={'class': 'h1'})
         self.byn = float(byn_rate.text)
-        self.byn = float(byn_rate.text)
 
     def convert(self):
         result = None
