@@ -35,9 +35,11 @@ class Converter:
         return soup
 
     def get_byn(self):
-        response = self.get('https://api.currencyapi.com/v3/latest?apikey=yeBX0cSeDO8EFfzzLhkRJoCGAzkhK8fiwGzD2fKK&currencies=BYN&base_currency=RUB').json()
-        byn_rate = response['data']['BYN']['value']
-        self.byn = float(byn_rate) * 100
+        soup = self.soup('https://myfin.by/bank/kursy_valjut_nbrb/rub')
+        block = soup.find('div', {"class": "cur-rate"})
+        byn_rate = block.find('div', attrs={'class': 'h1'})
+        self.byn = float(byn_rate.text)
+        self.byn = float(byn_rate.text)
 
     def convert(self):
         result = None
