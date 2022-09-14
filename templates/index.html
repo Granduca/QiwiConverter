@@ -15,35 +15,43 @@
       <form action="#">
         <div class="amount">
           <p>Введите сумму в RUB</p>
-          <input type="text" id = "rubInput" value="">
+          <div class="form_radio_group" id="group-1">
+            <div class="form_radio_group-item f-6">
+              <input class="rub-input" type="text" name="group-1"  id="rubInput" value="">
+            </div>
+            <div class="form_radio_group-item f-1">
+              <input id="check-invert" type="checkbox" name="group-1" onclick="invert(true)">
+              <label for="check-invert"><p>⇅</p></label>
+            </div>
+          </div>
         </div>
 
-        <div class="form_radio_group">
+        <div class="form_radio_group" id="group-2">
           <div class="form_radio_group-item">
-            <input id="radio-1" type="radio" name="radio" value="1" onclick="qiwi_client.set_score(qiwi_client.byn)">
+            <input id="radio-1" type="radio" name="group-2" value="1" onclick="qiwi_client.set_score(qiwi_client.byn)">
             <label for="radio-1">BYN</label>
           </div>
           <div class="form_radio_group-item">
-            <input id="radio-2" type="radio" name="radio" value="2" onclick="qiwi_client.set_score(qiwi_client.dollar_mt)">
+            <input id="radio-2" type="radio" name="group-2" value="2" onclick="qiwi_client.set_score(qiwi_client.dollar_mt)">
             <label for="radio-2">$ MT</label>
           </div>
           <div class="form_radio_group-item">
-            <input id="radio-3" type="radio" name="radio" value="3" onclick="qiwi_client.set_score(qiwi_client.dollar_bnb)">
+            <input id="radio-3" type="radio" name="group-2" value="3" onclick="qiwi_client.set_score(qiwi_client.dollar_bnb)">
             <label for="radio-3">$ BNB</label>
           </div>
           <div class="form_radio_group-item">
-            <input id="radio-4" type="radio" name="radio" value="4" onclick="qiwi_client.set_score(qiwi_client.euro_mt)">
+            <input id="radio-4" type="radio" name="group-2" value="4" onclick="qiwi_client.set_score(qiwi_client.euro_mt)">
             <label for="radio-4">€ MT</label>
           </div>
           <div class="form_radio_group-item">
-            <input id="radio-5" type="radio" name="radio" value="5" onclick="qiwi_client.set_score(qiwi_client.euro_bnb)">
+            <input id="radio-5" type="radio" name="group-2" value="5" onclick="qiwi_client.set_score(qiwi_client.euro_bnb)">
             <label for="radio-5">€ BNB</label>
           </div>
         </div>
 
         <div class="exchange-rate" id = "result"></div>
 
-        <button type="button" onclick="get_result()">Конвертировать</button>
+        <button type="button" onclick="invert()">Конвертировать</button>
       </form>
     </div>
   </body>

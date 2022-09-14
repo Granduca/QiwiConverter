@@ -41,7 +41,6 @@ form :where(input, select, button){
 }
 form p{
   font-size: 18px;
-  margin-bottom: 5px;
 }
 form input{
   height: 50px;
@@ -76,6 +75,10 @@ form .drop-list{
   border-radius: 5px;
   justify-content: center;
 --  border: 1px solid #999;
+}
+.rub-input{
+  border-radius: 6px 0 0 6px;
+  border-right: none;
 }
 .select-box img{
   max-width: 60px;
@@ -123,18 +126,26 @@ form button:hover{
     display: flex;
     margin-top: 10px;
     justify-content: center;
+    align-content: space-between;
 	overflow: hidden;
 }
 .form_radio_group-item {
+    display: flex;
     flex: 1;
 	justify-content: center;
+	align-items: stretch;
 }
 .form_radio_group input[type=radio] {
 	display: none;
 }
+.form_radio_group input[type=checkbox] {
+	display: none;
+}
 .form_radio_group label {
 	display: flex;
+	width: 100%;
 	justify-content: center;
+	align-items: center;
 	cursor: pointer;
 	line-height: 34px;
 	border: 1px solid #999;
@@ -154,6 +165,9 @@ form button:hover{
 .form_radio_group input[type=radio]:checked + label {
 	background: #ffe0a6;
 }
+.form_radio_group input[type=checkbox]:checked + label {
+	background: #ffe0a6;
+}
 
 /* Hover */
 .form_radio_group label:hover {
@@ -164,4 +178,12 @@ form button:hover{
 .form_radio_group input[type=radio]:disabled + label {
 	background: #efefef;
 	color: #666;
+}
+
+.f-1 {
+   flex: 1;
+}
+
+.f-6 {
+   flex: 6;
 }

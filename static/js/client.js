@@ -2,7 +2,12 @@ var activeRequest = false;
 
 class QiwiConverterClient {
     constructor(prefix, local_storage_var) {
-        this.score = null;
+        this.currency_byn = null;
+        this.currency_dollar_mt = null;
+        this.currency_dollar_bnb = null;
+        this.currency_euro_mt = null;
+        this.currency_euro_bnb = null
+
         this.byn = null;
         this.dollar_mt = null;
         this.dollar_bnb = null;
@@ -43,52 +48,123 @@ class QiwiConverterClient {
 
     set_score(score) {
         if (score) {
-            this.score = score;
-            document.getElementById("result").innerHTML = this.score;
+            document.getElementById("result").innerHTML = score;
         }
     }
 }
 
 var qiwi_client = new QiwiConverterClient();
 
-radio_byn = document.getElementById("radio-1");
-radio_byn.checked = true;
-radio_dollar_mt = document.getElementById("radio-2");
-radio_dollar_bnb = document.getElementById("radio-3");
-radio_euro_mt = document.getElementById("radio-4");
-radio_euro_bnb = document.getElementById("radio-5");
+var check_invert = document.getElementById("check-invert");
+check_invert.checked = false;
 
-radios = [radio_byn, radio_dollar_mt, radio_dollar_bnb, radio_euro_mt, radio_euro_bnb]
+var radio_byn = document.getElementById("radio-1");
+radio_byn.checked = true;
+
+var radio_dollar_mt = document.getElementById("radio-2");
+var radio_dollar_bnb = document.getElementById("radio-3");
+var radio_euro_mt = document.getElementById("radio-4");
+var radio_euro_bnb = document.getElementById("radio-5");
+
+var radios = [radio_byn, radio_dollar_mt, radio_dollar_bnb, radio_euro_mt, radio_euro_bnb]
 
 document.getElementById("rubInput").onkeypress = function(e) {
     if (!e) e = window.event;
     var keyCode = e.code || e.key;
     if (keyCode == 'Enter' || keyCode == 'NumpadEnter') {
-        get_result();
+        invert(false);
         return false;
+    }
+}
+
+function invert(is_user) {
+    let value = document.getElementById("rubInput").value;
+    if (is_user) {
+        let text = document.getElementById("result").innerHTML;
+        document.getElementById("result").innerHTML = value;
+        document.getElementById("rubInput").value = parseFloat(text);
+        return true;
+    }
+    if (check_invert.checked) {
+        if (radio_byn.checked) {
+            if (qiwi_client.currency_byn) {
+                document.getElementById("result").innerHTML = Math.round(qiwi_client.currency_byn * value);
+                return true;
+            } else {
+                check_invert.checked = false;
+                get_result();
+            }
+        }
+        if (radio_dollar_mt.checked) {
+            if (qiwi_client.currency_dollar_mt && qiwi_client.currency_byn) {
+                document.getElementById("result").innerHTML = Math.round(qiwi_client.currency_byn * (value * qiwi_client.currency_dollar_mt)) + " RUB";
+                return true;
+            } else {
+                check_invert.checked = false;
+                get_result();
+            }
+        }
+        if (radio_dollar_bnb.checked) {
+            if (qiwi_client.currency_dollar_bnb && qiwi_client.currency_byn) {
+                document.getElementById("result").innerHTML = Math.round(qiwi_client.currency_byn * (value * qiwi_client.currency_dollar_bnb)) + " RUB";
+                return true;
+            } else {
+                check_invert.checked = false;
+                get_result();
+            }
+        }
+        if (radio_euro_mt.checked) {
+            if (qiwi_client.currency_euro_mt && qiwi_client.currency_byn) {
+                document.getElementById("result").innerHTML = Math.round(qiwi_client.currency_byn * (value * qiwi_client.currency_euro_mt)) + " RUB";
+                return true;
+            } else {
+                check_invert.checked = false;
+                get_result();
+            }
+        }
+        if (radio_euro_bnb.checked) {
+            if (qiwi_client.currency_euro_bnb && qiwi_client.currency_byn) {
+                document.getElementById("result").innerHTML = Math.round(qiwi_client.currency_byn * (value * qiwi_client.currency_euro_bnb)) + " RUB";
+                return true;
+            } else {
+                check_invert.checked = false;
+                get_result();
+            }
+        }
+    } else {
+        get_result();
     }
 }
 
 function get_result() {
     let rub = document.getElementById("rubInput").value;
+
     if(!rub) {
         return false;
     }
+
     if (!checkNumber(rub)) {
         document.getElementById("result").innerHTML = "Ошибка ввода!<br>Требуется ввести число.";
         return false;
     }
+
     document.getElementById("result").innerHTML = "Отправляю запрос...";
     qiwi_client.post({
         "url": 'converter',
         "data": rub,
         "success": function(response) {
+                    qiwi_client.currency_byn = response.currency_byn;
+                    qiwi_client.currency_dollar_mt = response.currency_dollar_mt;
+                    qiwi_client.currency_dollar_bnb = response.currency_dollar_bnb;
+                    qiwi_client.currency_euro_mt = response.currency_euro_mt;
+                    qiwi_client.currency_euro_bnb = response.currency_euro_bnb;
+
                     qiwi_client.byn = response.byn;
                     qiwi_client.dollar_mt = response.dollar_mt;
                     qiwi_client.dollar_bnb = response.dollar_bnb;
                     qiwi_client.euro_mt = response.euro_mt;
                     qiwi_client.euro_bnb = response.euro_bnb;
-                    qiwi_client.score = qiwi_client.byn;
+
                     for (radio of radios) {
                         if (radio.checked) {
                             radio.click();

@@ -25,13 +25,14 @@ class Converter:
     def __init__(self, value):
         self.value = value
         self.byn = None
+        self.converted_byn = None
         self.dollar_mt = None
         self.dollar_bnb = None
         self.euro_mt = None
         self.euro_bnb = None
 
     def get(self, url):
-        request = requests.get(url)
+        request = requests.get(url, timeout=20)
         return request
 
     def soup(self, url):
@@ -85,6 +86,7 @@ class Converter:
             except Exception as e:
                 return str(e)
             result = 100 / 0.85 / 0.95 / self.byn
+            self.converted_byn = result
         return float(self.value) / result
 
     def result(self):
@@ -114,6 +116,9 @@ class Converter:
                     'byn': f"{format(byn_result, '.2f')} BYN",
                     'dollar_mt': f"$ {format(dollar_mt_result, '.2f')}", 'dollar_bnb': f"$ {format(dollar_bnb_result, '.2f')}",
                     'euro_mt': f"€ {format(euro_mt_result, '.2f')}", 'euro_bnb': f"€ {format(euro_bnb_result, '.2f')}",
+                    'currency_byn': self.converted_byn,
+                    'currency_dollar_mt': self.dollar_mt, 'currency_dollar_bnb': self.dollar_bnb,
+                    'currency_euro_mt': self.euro_mt, 'currency_euro_bnb': self.euro_bnb,
                     'code': 200}
         else:
             return {'message': 'Bad request', 'code': 500}
@@ -133,6 +138,9 @@ def qiwi_post():
                                      byn=result['byn'],
                                      dollar_mt=result['dollar_mt'], dollar_bnb=result['dollar_bnb'],
                                      euro_mt=result['euro_mt'], euro_bnb=result['euro_bnb'],
+                                     currency_byn=result['currency_byn'],
+                                     currency_dollar_mt=result['currency_dollar_mt'], currency_dollar_bnb=result['currency_dollar_bnb'],
+                                     currency_euro_mt=result['currency_euro_mt'], currency_euro_bnb=result['currency_euro_bnb'],
                                      status=result['code']))
     return response
 
