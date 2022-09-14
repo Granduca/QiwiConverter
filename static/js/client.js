@@ -3,6 +3,11 @@ var activeRequest = false;
 class QiwiConverterClient {
     constructor(prefix, local_storage_var) {
         this.score = null;
+        this.byn = null;
+        this.dollar_mt = null;
+        this.dollar_bnb = null;
+        this.euro_mt = null;
+        this.euro_bnb = null;
     }
 
     post(params) {
@@ -17,13 +22,9 @@ class QiwiConverterClient {
             data: params["data"],
             contentType: 'application/json;charset=UTF-8',
             success: function(response) {
-//                console.log(response);
                 activeRequest = false;
                 if(response.status == 200) {
-                    params["success"]();
-                    this.score = response.message;
-                    document.getElementById("result").innerHTML = this.score;
-
+                    params["success"](response);
                 } else if(response.status == 500) {
                     params["error"]();
                     document.getElementById("result").innerHTML = response.message;
@@ -39,10 +40,25 @@ class QiwiConverterClient {
             }
         });
     }
+
+    set_score(score) {
+        if (score) {
+            this.score = score;
+            document.getElementById("result").innerHTML = this.score;
+        }
+    }
 }
 
-var real_rio = new QiwiConverterClient();
+var qiwi_client = new QiwiConverterClient();
 
+radio_byn = document.getElementById("radio-1");
+radio_byn.checked = true;
+radio_dollar_mt = document.getElementById("radio-2");
+radio_dollar_bnb = document.getElementById("radio-3");
+radio_euro_mt = document.getElementById("radio-4");
+radio_euro_bnb = document.getElementById("radio-5");
+
+radios = [radio_byn, radio_dollar_mt, radio_dollar_bnb, radio_euro_mt, radio_euro_bnb]
 
 document.getElementById("rubInput").onkeypress = function(e) {
     if (!e) e = window.event;
@@ -63,11 +79,21 @@ function get_result() {
         return false;
     }
     document.getElementById("result").innerHTML = "Отправляю запрос...";
-    real_rio.post({
+    qiwi_client.post({
         "url": 'converter',
         "data": rub,
-        "success": function() {
-            document.getElementById("result").innerHTML = "Успешно!";
+        "success": function(response) {
+                    qiwi_client.byn = response.byn;
+                    qiwi_client.dollar_mt = response.dollar_mt;
+                    qiwi_client.dollar_bnb = response.dollar_bnb;
+                    qiwi_client.euro_mt = response.euro_mt;
+                    qiwi_client.euro_bnb = response.euro_bnb;
+                    qiwi_client.score = qiwi_client.byn;
+                    for (radio of radios) {
+                        if (radio.checked) {
+                            radio.click();
+                        }
+                    }
         },
         "error": function() {
             document.getElementById("result").innerHTML = "Ошибка!";
