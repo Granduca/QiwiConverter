@@ -187,3 +187,9 @@ form button:hover{
 .f-6 {
    flex: 6;
 }
+
+.rate-last-update {
+    text-align: center;
+    font-size: 12px;
+    color: #999;
+}

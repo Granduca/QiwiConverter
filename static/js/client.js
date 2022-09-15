@@ -120,6 +120,7 @@ function get_result() {
                         qiwi_client.euro_bnb = response.euro_bnb;
 
                         qiwi_client.updated = true;
+                        document.getElementById("rate-last-update").innerHTML = response.last_update;
 
                         set_values();
                         click_active_radio();

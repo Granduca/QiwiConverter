@@ -5,6 +5,9 @@ from flask_limiter.util import get_remote_address
 import requests
 from bs4 import BeautifulSoup
 
+from datetime import datetime
+import pytz
+
 import logging
 
 
@@ -29,6 +32,8 @@ class Converter:
         self.dollar_bnb = None
         self.euro_mt = None
         self.euro_bnb = None
+
+        self.last_update = None
 
     def get(self, url):
         request = requests.get(url, timeout=20)
@@ -81,10 +86,22 @@ class Converter:
     def get_qiwi(self):
         if self.byn:
             self.qiwi_byn = 100 / 0.85 / 0.95 / self.byn
+            self.last_update = datetime.now(pytz.timezone('Europe/Minsk'))
         else:
             return False
 
     def do(self):
+        dt_now = datetime.now(pytz.timezone('Europe/Minsk'))
+        if self.last_update:
+            if dt_now.date() > self.last_update.date():
+                self.byn = None
+                self.qiwi_byn = None
+                self.dollar_mt = None
+                self.dollar_bnb = None
+                self.euro_mt = None
+                self.euro_bnb = None
+                self.last_update = None
+
         self.get_byn()
         self.get_currency()
 
@@ -96,6 +113,7 @@ class Converter:
                     'qiwi_byn': self.qiwi_byn,
                     'dollar_mt': self.dollar_mt, 'dollar_bnb': self.dollar_bnb,
                     'euro_mt': self.euro_mt, 'euro_bnb': self.euro_bnb,
+                    'last_update': f"Курсы обновлены {self.last_update.strftime('%d.%m.%Y')} в {self.last_update.strftime('%H:%M')} (Минск)",
                     'code': 200}
         else:
             return {'message': 'Bad request', 'code': 500}
@@ -119,6 +137,7 @@ def qiwi_post():
                                      qiwi_byn=result['qiwi_byn'],
                                      dollar_mt=result['dollar_mt'], dollar_bnb=result['dollar_bnb'],
                                      euro_mt=result['euro_mt'], euro_bnb=result['euro_bnb'],
+                                     last_update=result['last_update'],
                                      status=result['code']))
     return response
 
