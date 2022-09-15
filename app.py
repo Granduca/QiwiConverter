@@ -22,10 +22,9 @@ limiter = Limiter(
 
 
 class Converter:
-    def __init__(self, value):
-        self.value = value
+    def __init__(self):
         self.byn = None
-        self.converted_byn = None
+        self.qiwi_byn = None
         self.dollar_mt = None
         self.dollar_bnb = None
         self.euro_mt = None
@@ -41,87 +40,68 @@ class Converter:
         return soup
 
     def get_byn(self):
-        soup = self.soup('https://myfin.by/bank/kursy_valjut_nbrb/rub')
-        block = soup.find('div', {"class": "cur-rate"})
-        byn_rate = block.find('div', attrs={'class': 'h1'})
-        self.byn = float(byn_rate.text)
+        if not self.byn:
+            soup = self.soup('https://myfin.by/bank/kursy_valjut_nbrb/rub')
+            block = soup.find('div', {"class": "cur-rate"})
+            byn_rate = block.find('div', attrs={'class': 'h1'})
+            self.byn = float(byn_rate.text)
 
     def get_currency(self):
-        table = self.soup('https://www.bnb.by/kursy-valyut/platezhnye-karty/')
-        table_body = table.find('tbody')
-        rows = table_body.find_all('tr')
-        data = []
-        for row in rows:
-            cols = row.find_all('td')
-            cols = [ele.text.strip() for ele in cols]
-            data.append([ele for ele in cols if ele])
-        for item in data:
-            if item[0] == 'USD':
-                self.dollar_bnb = float(item[2])
-            if item[0] == 'EUR':
-                self.euro_bnb = float(item[2])
+        if not self.dollar_mt or not self.euro_mt:
+            body = self.soup('https://myfin.by/bank/mtbank/currency')
+            table = body.find('div', attrs={'class': 'table-responsive'})
+            table_body = table.find('tbody')
+            rows = table_body.find_all('tr')
+            data = []
+            for row in rows:
+                cols = row.find_all('td')
+                cols = [ele.text.strip() for ele in cols]
+                data.append([ele for ele in cols if ele])
+            for item in data:
+                if item[0] == 'Доллар США':
+                    self.dollar_mt = float(item[2])
+                if item[0] == 'Евро':
+                    self.euro_mt = float(item[2])
 
-        body = self.soup('https://myfin.by/bank/mtbank/currency')
-        table = body.find('div', attrs={'class': 'table-responsive'})
-        table_body = table.find('tbody')
-        rows = table_body.find_all('tr')
-        data = []
-        for row in rows:
-            cols = row.find_all('td')
-            cols = [ele.text.strip() for ele in cols]
-            data.append([ele for ele in cols if ele])
-        for item in data:
-            if item[0] == 'Доллар США':
-                self.dollar_mt = float(item[2])
-            if item[0] == 'Евро':
-                self.euro_mt = float(item[2])
+        if not self.dollar_bnb or not self.euro_bnb:
+            table = self.soup('https://www.bnb.by/kursy-valyut/platezhnye-karty/')
+            table_body = table.find('tbody')
+            rows = table_body.find_all('tr')
+            data = []
+            for row in rows:
+                cols = row.find_all('td')
+                cols = [ele.text.strip() for ele in cols]
+                data.append([ele for ele in cols if ele])
+            for item in data:
+                if item[0] == 'USD':
+                    self.dollar_bnb = float(item[2])
+                if item[0] == 'EUR':
+                    self.euro_bnb = float(item[2])
 
-    def convert(self):
-        result = None
-        if self.value:
-            try:
-                float(self.value)
-            except ValueError as e:
-                return 'Ошибка ввода!<br>Требуется ввести число.'
-            except Exception as e:
-                return str(e)
-            result = 100 / 0.85 / 0.95 / self.byn
-            self.converted_byn = result
-        return float(self.value) / result
+    def get_qiwi(self):
+        if self.byn:
+            self.qiwi_byn = 100 / 0.85 / 0.95 / self.byn
+        else:
+            return False
 
-    def result(self):
+    def do(self):
         self.get_byn()
         self.get_currency()
-        byn_result = self.convert()
-        try:
-            dollar_mt_result = byn_result / self.dollar_mt
-        except:
-            dollar_mt_result = -1
-        try:
-            dollar_bnb_result = byn_result / self.dollar_bnb
-        except:
-            dollar_bnb_result = -1
-        try:
-            euro_mt_result = byn_result / self.euro_mt
-        except:
-            euro_mt_result = -1
-        try:
-            euro_bnb_result = byn_result / self.euro_bnb
-        except :
-            euro_bnb_result = -1
-        if byn_result:
-            if type(byn_result) != float:
-                return {'message': byn_result, 'code': 500}
+
+        self.get_qiwi()
+
+        if all(self.__dict__.values()):
             return {'message': "OK",
-                    'byn': f"{format(byn_result, '.2f')} BYN",
-                    'dollar_mt': f"$ {format(dollar_mt_result, '.2f')}", 'dollar_bnb': f"$ {format(dollar_bnb_result, '.2f')}",
-                    'euro_mt': f"€ {format(euro_mt_result, '.2f')}", 'euro_bnb': f"€ {format(euro_bnb_result, '.2f')}",
-                    'currency_byn': self.converted_byn,
-                    'currency_dollar_mt': self.dollar_mt, 'currency_dollar_bnb': self.dollar_bnb,
-                    'currency_euro_mt': self.euro_mt, 'currency_euro_bnb': self.euro_bnb,
+                    'byn': self.byn,
+                    'qiwi_byn': self.qiwi_byn,
+                    'dollar_mt': self.dollar_mt, 'dollar_bnb': self.dollar_bnb,
+                    'euro_mt': self.euro_mt, 'euro_bnb': self.euro_bnb,
                     'code': 200}
         else:
             return {'message': 'Bad request', 'code': 500}
+
+
+converter = Converter()
 
 
 @app.route('/')
@@ -133,14 +113,12 @@ def index():
 def qiwi_post():
     data = request.data.decode('utf-8')
     logger.info(f"Request: {data}")
-    result = Converter(data).result()
+    result = converter.do()
     response = make_response(jsonify(message=result['message'],
                                      byn=result['byn'],
+                                     qiwi_byn=result['qiwi_byn'],
                                      dollar_mt=result['dollar_mt'], dollar_bnb=result['dollar_bnb'],
                                      euro_mt=result['euro_mt'], euro_bnb=result['euro_bnb'],
-                                     currency_byn=result['currency_byn'],
-                                     currency_dollar_mt=result['currency_dollar_mt'], currency_dollar_bnb=result['currency_dollar_bnb'],
-                                     currency_euro_mt=result['currency_euro_mt'], currency_euro_bnb=result['currency_euro_bnb'],
                                      status=result['code']))
     return response
 
