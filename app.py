@@ -98,8 +98,8 @@ class Converter:
                 self.last_update = dt_now
             return self.make_response()
         else:
-            if Path('json/rate.json').is_file():
-                with open('json/rate.json', 'r') as f:
+            if Path('rate.json').is_file():
+                with open('rate.json', 'r') as f:
                     data = json.load(f)
                     if data:
                         data['last_update'] = datetime.strptime(data['last_update'], '%d/%m/%Y, %H:%M:%S')
@@ -143,7 +143,7 @@ class Converter:
                         'euro_mt': self.euro_mt, 'euro_bnb': self.euro_bnb,
                         'last_update': self.last_update.strftime("%d/%m/%Y, %H:%M:%S")}
 
-            with open('json/rate.json', 'w', encoding='utf-8') as f:
+            with open('rate.json', 'w+', encoding='utf-8') as f:
                 json.dump(response, f, ensure_ascii=False)
 
             response['last_update'] = f"Курсы обновлены {self.last_update.strftime('%d.%m.%Y')} в {self.last_update.strftime('%H:%M')} (Минск)"
